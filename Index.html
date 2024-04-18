@@ -8,6 +8,7 @@
         //美金->台幣匯率換算fn
         function USDtoTWD() {
             let USD = $('#MASTER_CAP').val();
+            $('#MASTER_CAP').val(numberComma(USD));
             let USPCNT = $('#USPCNT').val();
             if (USPCNT == '') {
                 alert('請輸入美金匯率比值');
@@ -16,23 +17,112 @@
                 alert('請輸入申貸金額(美元)');
                 return;
             } else {
-                let TWD = USD * USPCNT;
-                $('#RATE').val(TWD);
+                let TWD =Number(replaceComma(USD)) * USPCNT;
+                $('#RATE').val(numberComma(TWD));
             }
         };
         //字元擷取fn
         function LEFT(str, num) {
             return str.substring(0, num);
-        }
+        };
         function RIGHT(str, num) {
             return str.substring(str.length - num, str.length);
+        };
+
+        //驗證小數點欄位 fn
+        function numFloat(){
+            $('.txtIncome').off().on('keypress',function(e){
+                // 获取用户输入的字符
+                var inputChar = String.fromCharCode(e.which);
+                // 判断输入的字符是否是数字或小数点
+                if (!/^[0-9.]/.test(inputChar)) {
+                    // 如果不是，阻止该字符的输入
+                    e.preventDefault();
+                }
+                // 判断小数点后是否超过两位
+                if (e.shiftKey && (e.which == 46 || e.which == 106)) { // 如果用户同时按下了shift键和点号键（.）或小键盘上的等号键（=），则允许输入三位小数
+                    e.preventDefault(); // 阻止输入
+                }
+                // 判断总长度是否超过5位（包括小数点）
+                if ($(this).val().length >= 5) { // 如果总长度超过5位，则阻止继续输入
+                    e.preventDefault(); // 阻止输入
+                }
+
+            });
+
+        };
+
+        //試算 fn
+        function Calculate() {
+            $('#tbd2').empty();
+            let tbody = $('#tbd2');
+            let B_M = 1;
+            let E_M = 1;
+            let USPCNT = $('#USPCNT').val();
+            $('.txtMonth').each(function (index, value) {
+                if (index == 0) {
+                    let Mn = $(this).val();
+                    let MASTER_CAP = $('#MASTER_CAP').val();
+                    MASTER_CAP = replaceComma(MASTER_CAP);
+                    let T_MASTER_CAP = MASTER_CAP.replace(RIGHT(MASTER_CAP, 4), '0000');
+                    let PCNT = $(`#txtIncome${index}`).val();
+                    PCNT = PCNT / 100;
+                    let Income = Number(T_MASTER_CAP) * (PCNT / 12) * Number(Mn);
+                    Income = Math.round(Income);
+                    let Total = Number(MASTER_CAP) + Income;
+                    let ToTWD = Total * Number(USPCNT);
+                    //console.log(PCNT);
+                    //console.log(Income);
+                    tbody.append(`<tr><td><span id="sp_Mn${index}">${"1~" + Mn + "月"}</span></td>
+                    <td><span id="sp_MASTER_CAP${index}">${numberComma(MASTER_CAP)}</span></td>
+                    <td><span id="sp_T_MASTER_CAP${index}">${numberComma(T_MASTER_CAP)}</span></td>
+                    <td><span id="sp_Income${index}">${numberComma(Income)}</span></td>
+                    <td><span id="sp_Total${index}">${numberComma(Total)}</span></td>
+                    <td><span id="sp_ToTWD${index}">${numberComma(ToTWD)}</span></td>
+                    </tr>`)
+                } else {
+                    let Mn = $(this).val();
+                    console.log(Mn);
+                    B_M = index - 1 == 0 ? Number(($(`#txtMonth${index - 1}`).val())) + 1 : E_M + 1;
+                    E_M = Number($(`#txtMonth${index}`).val());
+                    E_M = B_M + E_M - 1;
+                    let MASTER_CAP = $(`#sp_Total${index - 1}`).text();
+                    MASTER_CAP = replaceComma(MASTER_CAP);
+                    console.log(MASTER_CAP);
+                    let T_MASTER_CAP = MASTER_CAP.replace(RIGHT(MASTER_CAP, 4), '0000');
+                    let PCNT = $(`#txtIncome${index}`).val();
+                    PCNT = PCNT / 100;
+                    let Income = Number(T_MASTER_CAP) * (PCNT / 12) * Number(Mn);
+                    Income = Math.round(Income);
+                    let Total = Number(MASTER_CAP) + Income;
+                    let ToTWD = Total * Number(USPCNT);
+                    tbody.append(`<tr><td><span id="sp_Mn${index}">${B_M + "~" + E_M + "月"}</span></td>
+                    <td><span id="sp_MASTER_CAP${index}">${numberComma(MASTER_CAP)}</span></td>
+                    <td><span id="sp_T_MASTER_CAP${index}">${numberComma(T_MASTER_CAP)}</span></td>
+                    <td><span id="sp_Income${index}">${numberComma(Income)}</span></td>
+                    <td><span id="sp_Total${index}">${numberComma(Total)}</span></td>
+                    <td><span id="sp_ToTWD${index}">${numberComma(ToTWD)}</span></td>
+                    </tr>`)
+                    //console.log(B_M);
+                    //console.log(E_M);
+                };
+            });
+        };
+        //str轉換千分位
+        function numberComma(num){
+            let comma=/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g;
+            return num.toString().replace(comma, ',');
+        };
+        //str千分位移除逗號
+        function replaceComma(num){
+            return num.replaceAll(',','');
         }
 
+
         $(document).ready(function () {
-            //美金台幣匯率換算
-            $('#MASTER_CAP').on('blur', function () {
-                USDtoTWD();
-            });
+            //小數點限制
+            numFloat();
+
             //加一筆資料 td
             $('#InsertRow').on('click', function () {
                 let tbody = $('#tbd');
@@ -40,7 +130,8 @@
                 tbody.append(`<tr><td class="txtID" style="width:1%">${num+1}</td>
                 <td style="width:20%"><input type="number" maxlength="2" min="1" max="12" class="form-control form-control-sm NUM txtMonth" id="txtMonth${num}" placeholder="輸入期數"></td>
                 <td style="width:20%"><input type="number" min="10" max="70" class="form-control form-control-sm NUM txtIncome" id="txtIncome${num}" placeholder="輸入(%)"></td></tr>`)
-
+                //重新綁定監聽事件
+                numFloat();
             });
             //減一筆資料 td
             $('#DeleteRow').on('click', function () {
@@ -61,57 +152,31 @@
             });
             //展出試算
             $('#Calculate').on('click', function () {
-                $('#tbd2').empty();
-                let tbody = $('#tbd2');
-                let B_M = 1;
-                let E_M = 1;
-                let USPCNT = $('#USPCNT').val();
-                $('.txtMonth').each(function (index, value) {
-                    if (index == 0) {
-                        let Mn = $(this).val();
-                        let MASTER_CAP = $('#MASTER_CAP').val();
-                        let T_MASTER_CAP = MASTER_CAP.replace(RIGHT(MASTER_CAP, 4), '0000');
-                        let PCNT = $(`#txtIncome${index}`).val();
-                        PCNT = PCNT / 100;
-                        let Income = Number(T_MASTER_CAP) * (PCNT / 12) * Number(Mn);
-                        Income = Math.round(Income);
-                        let Total = Number(MASTER_CAP) + Income;
-                        let ToTWD = Total * Number(USPCNT);
-                        //console.log(PCNT);
-                        //console.log(Income);
-                        tbody.append(`<tr><td><span id="sp_Mn${index}">${"1~" + Mn + "月"}</span></td>
-                        <td><span id="sp_MASTER_CAP${index}">${MASTER_CAP}</span></td>
-                        <td><span id="sp_T_MASTER_CAP${index}">${T_MASTER_CAP}</span></td>
-                        <td><span id="sp_Income${index}">${Income}</span></td>
-                        <td><span id="sp_Total${index}">${Total}</span></td>
-                        <td><span id="sp_ToTWD${index}">${ToTWD}</span></td>
-                        </tr>`)
-                    } else {
-                        let Mn = $(this).val();
-                        console.log(Mn);
-                        B_M = index - 1 == 0 ? Number(($(`#txtMonth${index - 1}`).val())) + 1 : E_M + 1;
-                        //B_M = Number(($(`#txtMonth${index - 1}`).val())) + 1;
-                        E_M = Number($(`#txtMonth${index}`).val());
-                        E_M = B_M + E_M - 1;
-                        let MASTER_CAP = $(`#sp_Total${index - 1}`).text();
-                        let T_MASTER_CAP = MASTER_CAP.replace(RIGHT(MASTER_CAP, 4), '0000');
-                        let PCNT = $(`#txtIncome${index}`).val();
-                        PCNT = PCNT / 100;
-                        let Income = Number(T_MASTER_CAP) * (PCNT / 12) * Number(Mn);
-                        Income = Math.round(Income);
-                        let Total = Number(MASTER_CAP) + Income;
-                        let ToTWD = Total * Number(USPCNT);
-                        tbody.append(`<tr><td><span id="sp_Mn${index}">${B_M + "~" + E_M + "月"}</span></td>
-                        <td><span id="sp_MASTER_CAP${index}">${MASTER_CAP}</span></td>
-                        <td><span id="sp_T_MASTER_CAP${index}">${T_MASTER_CAP}</span></td>
-                        <td><span id="sp_Income${index}">${Income}</span></td>
-                        <td><span id="sp_Total${index}">${Total}</span></td>
-                        <td><span id="sp_ToTWD${index}">${ToTWD}</span></td>
-                        </tr>`)
-                        //console.log(B_M);
-                        //console.log(E_M);
-                    };
+                var check = true;
+                $('.NUM').each(function(index,value){
+                    let txtbox = $(this).val();
+                    if(txtbox==''){
+                        alert('欄位不可為空，請填寫/刪減欄位。');
+                        check = false;
+                        return false;
+                    }
                 });
+                if(check==false){
+                    return false;
+                }
+                Calculate();
+            });
+            //本金檢核 必須超過1w
+            $('#MASTER_CAP').on('blur',function(){
+                let val = $('#MASTER_CAP').val();
+                val = replaceComma(val);
+                if(Number(val)<10000 && val !=''){
+                    alert('本金不可以小於10,000美元');
+                    $('#MASTER_CAP,#RATE').val("");
+                    return false;
+                }else{
+                    USDtoTWD();
+                }
             });
         });
     </script>
@@ -180,16 +245,7 @@
                     <th>換匯台幣</th>
                 </tr>
             </thead>
-            <tbody id="tbd2">
-                <!--<tr>
-                    <td>1</td>
-                    <td>2</td>
-                    <td>3</td>
-                    <td>4</td>
-                    <td>5</td>
-                    <td>6</td>
-                </tr>-->
-            </tbody>
+            <tbody id="tbd2"></tbody>
         </table>
     </div>
 </body>
