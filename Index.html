@@ -10,16 +10,8 @@
             let USD = $('#MASTER_CAP').val();
             $('#MASTER_CAP').val(numberComma(USD));
             let USPCNT = $('#USPCNT').val();
-            if (USPCNT == '') {
-                alert('請輸入美金匯率比值');
-                return;
-            } else if (USD == '') {
-                alert('請輸入申貸金額(美元)');
-                return;
-            } else {
-                let TWD =Number(replaceComma(USD)) * USPCNT;
-                $('#RATE').val(numberComma(TWD));
-            }
+            let TWD =Number(replaceComma(USD)) * USPCNT;
+            $('#RATE').val(numberComma(TWD));
         };
         //字元擷取fn
         function LEFT(str, num) {
@@ -32,20 +24,20 @@
         //驗證小數點欄位 fn
         function numFloat(){
             $('.txtIncome').off().on('keypress',function(e){
-                // 获取用户输入的字符
+                // 獲取字符
                 var inputChar = String.fromCharCode(e.which);
-                // 判断输入的字符是否是数字或小数点
+                // 判斷輸入是否為數字或小數點
                 if (!/^[0-9.]/.test(inputChar)) {
                     // 如果不是，阻止该字符的输入
                     e.preventDefault();
                 }
-                // 判断小数点后是否超过两位
-                if (e.shiftKey && (e.which == 46 || e.which == 106)) { // 如果用户同时按下了shift键和点号键（.）或小键盘上的等号键（=），则允许输入三位小数
+                // 判斷小數點後是否超過兩位
+                if (e.shiftKey && (e.which == 46 || e.which == 106)) { // 如果同时按下了shift键和點號鍵（.）或小鍵盤上的等號鍵（=），則允許輸入三位小數
                     e.preventDefault(); // 阻止输入
                 }
-                // 判断总长度是否超过5位（包括小数点）
-                if ($(this).val().length >= 5) { // 如果总长度超过5位，则阻止继续输入
-                    e.preventDefault(); // 阻止输入
+                // 判斷總長度(含小數點)是否超過五位
+                if ($(this).val().length >= 5) { // 如果超過5位數則停止
+                    e.preventDefault(); // 停止
                 }
 
             });
@@ -169,7 +161,16 @@
             //本金檢核 必須超過1w
             $('#MASTER_CAP').on('blur',function(){
                 let val = $('#MASTER_CAP').val();
+                let USPCNT = $('#USPCNT').val();
                 val = replaceComma(val);
+                if(val==''){
+                    return false;
+                }
+                if(USPCNT =='' && val!=''){
+                    alert('請先輸入美金匯率');
+                    $('#MASTER_CAP,#RATE').val("");
+                    return false;
+                }
                 if(Number(val)<10000 && val !=''){
                     alert('本金不可以小於10,000美元');
                     $('#MASTER_CAP,#RATE').val("");
