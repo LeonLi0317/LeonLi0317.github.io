@@ -1,0 +1,196 @@
+﻿<!DOCTYPE html>
+<html lang="zh-tw" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script>
+        //美金->台幣匯率換算fn
+        function USDtoTWD() {
+            let USD = $('#MASTER_CAP').val();
+            let USPCNT = $('#USPCNT').val();
+            if (USPCNT == '') {
+                alert('請輸入美金匯率比值');
+                return;
+            } else if (USD == '') {
+                alert('請輸入申貸金額(美元)');
+                return;
+            } else {
+                let TWD = USD * USPCNT;
+                $('#RATE').val(TWD);
+            }
+        };
+        //字元擷取fn
+        function LEFT(str, num) {
+            return str.substring(0, num)
+        }
+        function RIGHT(str, num) {
+            return str.substring(str.length - num, str.length)
+        }
+
+        $(document).ready(function () {
+            //美金台幣匯率換算
+            $('#MASTER_CAP').on('blur', function () {
+                USDtoTWD();
+            });
+            //加一筆資料 td
+            $('#InsertRow').on('click', function () {
+                let tbody = $('#tbd');
+                let num = $('#tb').find('tbody').find('tr').length;
+                tbody.append(`<tr><td class="txtID" style="width:1%">${num+1}</td>
+                <td style="width:20%"><input type="number" maxlength="2" min="1" max="12" class="form-control form-control-sm NUM txtMonth" id="txtMonth${num}" placeholder="輸入期數"></td>
+                <td style="width:20%"><input type="number" min="10" max="70" class="form-control form-control-sm NUM txtIncome" id="txtIncome${num}" placeholder="輸入(%)"></td></tr>`)
+
+            });
+            //減一筆資料 td
+            $('#DeleteRow').on('click', function () {
+                let tbody = $('#tb').find('tbody').find('tr');
+                let num = $('#tb').find('tbody').find('tr').length;
+                if (num != 1) {
+                    tbody.eq(num - 1).remove();
+                }
+            });
+            //清空+還原欄位 td
+            $('#DeleteALL').on('click', function () {
+                let tbody = $('#tbd,#tbd2').find('tr');
+                let num = $('#tbd,#tbd2').find('tr').length;
+                for (let i = 1; i <= num ; i++) {
+                    tbody.eq(i).remove();
+                }
+                $('.NUM').val("");
+            });
+            //展出試算
+            $('#Calculate').on('click', function () {
+                $('#tbd2').empty();
+                let tbody = $('#tbd2');
+                let B_M = 1;
+                let E_M = 1;
+                let USPCNT = $('#USPCNT').val();
+                $('.txtMonth').each(function (index, value) {
+                    if (index == 0) {
+                        let Mn = $(this).val();
+                        let MASTER_CAP = $('#MASTER_CAP').val();
+                        let T_MASTER_CAP = MASTER_CAP.replace(RIGHT(MASTER_CAP, 4), '0000');
+                        let PCNT = $(`#txtIncome${index}`).val();
+                        PCNT = PCNT / 100;
+                        let Income = Number(T_MASTER_CAP) * (PCNT / 12) * Number(Mn);
+                        Income = Math.round(Income);
+                        let Total = Number(MASTER_CAP) + Income;
+                        let ToTWD = Total * Number(USPCNT);
+                        //console.log(PCNT);
+                        //console.log(Income);
+                        tbody.append(`<tr><td><span id="sp_Mn${index}">${"1~" + Mn + "月"}</span></td>
+                        <td><span id="sp_MASTER_CAP${index}">${MASTER_CAP}</span></td>
+                        <td><span id="sp_T_MASTER_CAP${index}">${T_MASTER_CAP}</span></td>
+                        <td><span id="sp_Income${index}">${Income}</span></td>
+                        <td><span id="sp_Total${index}">${Total}</span></td>
+                        <td><span id="sp_ToTWD${index}">${ToTWD}</span></td>
+                        </tr>`)
+                    } else {
+                        let Mn = $(this).val();
+                        console.log(Mn);
+                        B_M = index - 1 == 0 ? Number(($(`#txtMonth${index - 1}`).val())) + 1 : E_M + 1;
+                        //B_M = Number(($(`#txtMonth${index - 1}`).val())) + 1;
+                        E_M = Number($(`#txtMonth${index}`).val());
+                        E_M = B_M + E_M - 1;
+                        let MASTER_CAP = $(`#sp_Total${index - 1}`).text();
+                        let T_MASTER_CAP = MASTER_CAP.replace(RIGHT(MASTER_CAP, 4), '0000');
+                        let PCNT = $(`#txtIncome${index}`).val();
+                        PCNT = PCNT / 100;
+                        let Income = Number(T_MASTER_CAP) * (PCNT / 12) * Number(Mn);
+                        Income = Math.round(Income);
+                        let Total = Number(MASTER_CAP) + Income;
+                        let ToTWD = Total * Number(USPCNT);
+                        tbody.append(`<tr><td><span id="sp_Mn${index}">${B_M + "~" + E_M + "月"}</span></td>
+                        <td><span id="sp_MASTER_CAP${index}">${MASTER_CAP}</span></td>
+                        <td><span id="sp_T_MASTER_CAP${index}">${T_MASTER_CAP}</span></td>
+                        <td><span id="sp_Income${index}">${Income}</span></td>
+                        <td><span id="sp_Total${index}">${Total}</span></td>
+                        <td><span id="sp_ToTWD${index}">${ToTWD}</span></td>
+                        </tr>`)
+                        //console.log(B_M);
+                        //console.log(E_M);
+                    };
+                });
+            });
+        });
+    </script>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+    <div class="row" style="padding-left:5%;padding-right:5%;padding-top:5%">
+        <div class="col">
+            <label for="US">美金匯率1：</label>
+            <label for="USPCNT">
+                <input type="text" class="form-control NUM" id="USPCNT" placeholder="比值" maxlength="2" style="width:35%" aria-label="RATE">
+            </label>
+        </div>
+    </div>
+    <div class="row" style="padding-left:5%;padding-right:5%;padding-top:10px">
+        <div class="col">
+            <label for="MASTER_CAP">
+                投資本金(美元)
+                <input type="text" class="form-control NUM" id="MASTER_CAP" placeholder="輸入申貸金額" aria-label="MASTER_CAP">
+            </label>
+            ＝
+            <label for="MASTER_CAP">
+                換匯台幣
+                <input type="text" class="form-control NUM" id="RATE" placeholder="輸入申貸利率" aria-label="RATE" disabled="disabled">
+            </label>
+        </div>
+    </div>
+    <div class="row" style="padding-left:5%;padding-right:5%;padding-top:10px">
+        <div class="row">
+            <input type="button" style="width:33.3%" id="InsertRow" value="加一筆資料" />
+            <input type="button" style="width:33.3%" id="DeleteRow" value="減一筆資料" />
+            <input type="button" style="width:33.3%" id="DeleteALL" value="全部清除" />
+        </div>
+        <table class="table" id="tb" style="width:50%">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>預計天期(月)</th>
+                    <th>年化收益(%)</th>
+                </tr>
+            </thead>
+            <tbody id="tbd">
+                <tr>
+                    <td class="txtID" style="width:1%">1</td>
+                    <td style="width:20%"><input type="number" maxlength="2" min="1" max="12" class="form-control form-control-sm NUM txtMonth" id="txtMonth0" placeholder="輸入期數"></td>
+                    <td style="width:20%"><input type="number" min="10" max="70" class="form-control form-control-sm NUM txtIncome" id="txtIncome0" placeholder="輸入(%)"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <br />
+    <div class="row" style="padding-left:5%;padding-right:5%;padding-top:10px">
+        <div class="row">
+            <input type="button" style="width:100%" id="Calculate" value="開始試算" />
+        </div>
+        <table class="table table-striped table-hover caption-top" id="tb2" style="width:99%">
+            <caption></caption>
+            <thead>
+                <tr>
+                    <th>期數</th>
+                    <th>本金(美元)</th>
+                    <th>實際投資金額(美元)</th>
+                    <th>年化收益</th>
+                    <th>本+利息</th>
+                    <th>換匯台幣</th>
+                </tr>
+            </thead>
+            <tbody id="tbd2">
+                <!--<tr>
+                    <td>1</td>
+                    <td>2</td>
+                    <td>3</td>
+                    <td>4</td>
+                    <td>5</td>
+                    <td>6</td>
+                </tr>-->
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
