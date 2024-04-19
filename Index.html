@@ -74,13 +74,13 @@
                     </tr>`)
                 } else {
                     let Mn = $(this).val();
-                    console.log(Mn);
+                    //console.log(Mn);
                     B_M = index - 1 == 0 ? Number(($(`#txtMonth${index - 1}`).val())) + 1 : E_M + 1;
                     E_M = Number($(`#txtMonth${index}`).val());
                     E_M = B_M + E_M - 1;
                     let MASTER_CAP = $(`#sp_Total${index - 1}`).text();
                     MASTER_CAP = replaceComma(MASTER_CAP);
-                    console.log(MASTER_CAP);
+                    //console.log(MASTER_CAP);
                     let T_MASTER_CAP = MASTER_CAP.replace(RIGHT(MASTER_CAP, 4), '0000');
                     let PCNT = $(`#txtIncome${index}`).val();
                     PCNT = PCNT / 100;
@@ -112,6 +112,13 @@
 
 
         $(document).ready(function () {
+            //只允許輸入數字
+            $('#USPCNT , #MASTER_CAP').on('keypress',function(e){
+                var inputvalue = e.which;
+                if(inputvalue < 48 || inputvalue > 57){
+                    e.preventDefault();
+                }
+            });
             //小數點限制
             numFloat();
 
@@ -158,6 +165,13 @@
                 }
                 Calculate();
             });
+
+            //欄位選取時移除逗號
+            $('#MASTER_CAP').on('focus',function(){
+                var val = $('#MASTER_CAP').val();
+                $('#MASTER_CAP').val(replaceComma(val));
+            });
+
             //本金檢核 必須超過1w
             $('#MASTER_CAP').on('blur',function(){
                 let val = $('#MASTER_CAP').val();
