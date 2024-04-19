@@ -53,6 +53,9 @@
             let USPCNT = $('#USPCNT').val();
             $('.txtMonth').each(function (index, value) {
                 if (index == 0) {
+                    let IncomePCNT = $('#txtIncome0').val();
+                    IncomePCNT = '第 '+(Number(index)+1).toString()+' 期　年化收益：'+ IncomePCNT +'%';
+
                     let Mn = $(this).val();
                     let MASTER_CAP = $('#MASTER_CAP').val();
                     MASTER_CAP = replaceComma(MASTER_CAP);
@@ -65,7 +68,8 @@
                     let ToTWD = Total * Number(USPCNT);
                     //console.log(PCNT);
                     //console.log(Income);
-                    tbody.append(`<tr><td><span id="sp_Mn${index}">${"1~" + Mn + "月"}</span></td>
+                    tbody.append(`<tr><td colspan="6" style="text-align:center;" ><span style="font-weight:bold;color:darkmagenta;">${IncomePCNT}</span></td></tr>
+                    <tr><td><span id="sp_Mn${index}">${"1~" + Mn + "月"}</span></td>
                     <td><span id="sp_MASTER_CAP${index}">${numberComma(MASTER_CAP)}</span></td>
                     <td><span id="sp_T_MASTER_CAP${index}">${numberComma(T_MASTER_CAP)}</span></td>
                     <td><span id="sp_Income${index}">${numberComma(Income)}</span></td>
@@ -73,6 +77,8 @@
                     <td><span id="sp_ToTWD${index}">${numberComma(ToTWD)}</span></td>
                     </tr>`)
                 } else {
+                    let IncomePCNT = $(`#txtIncome${index}`).val();
+                    IncomePCNT = '第 '+(Number(index)+1).toString()+' 期　年化收益：'+ IncomePCNT +'%';
                     let Mn = $(this).val();
                     //console.log(Mn);
                     B_M = index - 1 == 0 ? Number(($(`#txtMonth${index - 1}`).val())) + 1 : E_M + 1;
@@ -88,7 +94,8 @@
                     Income = Math.round(Income);
                     let Total = Number(MASTER_CAP) + Income;
                     let ToTWD = Total * Number(USPCNT);
-                    tbody.append(`<tr><td><span id="sp_Mn${index}">${B_M + "~" + E_M + "月"}</span></td>
+                    tbody.append(`<tr><td colspan="6" style="text-align:center;" ><span style="font-weight:bold;color:darkmagenta;">${IncomePCNT}</span></td></tr>
+                    <tr><td><span id="sp_Mn${index}">${B_M + "~" + E_M + "月"}</span></td>
                     <td><span id="sp_MASTER_CAP${index}">${numberComma(MASTER_CAP)}</span></td>
                     <td><span id="sp_T_MASTER_CAP${index}">${numberComma(T_MASTER_CAP)}</span></td>
                     <td><span id="sp_Income${index}">${numberComma(Income)}</span></td>
@@ -252,10 +259,10 @@
             <caption></caption>
             <thead>
                 <tr>
-                    <th>期數</th>
+                    <th>期迄</th>
                     <th>本金(美元)</th>
                     <th>實際投資金額(美元)</th>
-                    <th>年化收益</th>
+                    <th>獲利(美金)</th>
                     <th>本+利息</th>
                     <th>換匯台幣</th>
                 </tr>
