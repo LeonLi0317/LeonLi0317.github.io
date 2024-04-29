@@ -10,7 +10,7 @@
             let USD = $('#MASTER_CAP').val();
             $('#MASTER_CAP').val(numberComma(USD));
             let USPCNT = $('#USPCNT').val();
-            let TWD =Number(replaceComma(USD)) * USPCNT;
+            let TWD =Math.round(Number(replaceComma(USD)) * USPCNT);
             $('#RATE').val(numberComma(TWD));
         };
         //字元擷取fn
@@ -65,7 +65,7 @@
                     let Income = Number(T_MASTER_CAP) * (PCNT / 12) * Number(Mn);
                     Income = Math.round(Income);
                     let Total = Number(MASTER_CAP) + Income;
-                    let ToTWD = Total * Number(USPCNT);
+                    let ToTWD = Math.round(Total * Number(USPCNT));
                     //console.log(PCNT);
                     //console.log(Income);
                     tbody.append(`<tr><td colspan="6" style="text-align:center;" ><span style="font-weight:bold;color:darkmagenta;">${IncomePCNT}</span></td></tr>
@@ -93,7 +93,7 @@
                     let Income = Number(T_MASTER_CAP) * (PCNT / 12) * Number(Mn);
                     Income = Math.round(Income);
                     let Total = Number(MASTER_CAP) + Income;
-                    let ToTWD = Total * Number(USPCNT);
+                    let ToTWD = Math.round(Total * Number(USPCNT));
                     tbody.append(`<tr><td colspan="6" style="text-align:center;" ><span style="font-weight:bold;color:darkmagenta;">${IncomePCNT}</span></td></tr>
                     <tr><td><span id="sp_Mn${index}">${B_M + "~" + E_M + "月"}</span></td>
                     <td><span id="sp_MASTER_CAP${index}">${numberComma(MASTER_CAP)}</span></td>
@@ -120,7 +120,7 @@
 
         $(document).ready(function () {
             //只允許輸入數字
-            $('#USPCNT , #MASTER_CAP').on('keypress',function(e){
+            $('#MASTER_CAP').on('keypress',function(e){
                 var inputvalue = e.which;
                 if(inputvalue < 48 || inputvalue > 57){
                     e.preventDefault();
@@ -210,14 +210,14 @@
         <div class="col">
             <label for="US">美金匯率1：</label>
             <label for="USPCNT">
-                <input type="text" class="form-control NUM" id="USPCNT" placeholder="比值" maxlength="2" style="width:35%" aria-label="RATE">
+                <input type="text" class="form-control NUM" id="USPCNT" placeholder="比值" maxlength="4" style="width:35%" aria-label="RATE">
             </label>
         </div>
     </div>
     <div class="row" style="padding-left:5%;padding-right:5%;padding-top:10px">
         <div class="col">
             <label for="MASTER_CAP">
-                投資本金(美元)
+                投資本金(USD)
                 <input type="text" class="form-control NUM" id="MASTER_CAP" placeholder="輸入本金" aria-label="MASTER_CAP">
             </label>
             ＝
@@ -260,11 +260,11 @@
             <thead>
                 <tr>
                     <th>期迄</th>
-                    <th>本金(美元)</th>
-                    <th>實際投資金額(美元)</th>
-                    <th>獲利(美金)</th>
-                    <th>本+利息</th>
-                    <th>換匯台幣</th>
+                    <th>本金(USD)</th>
+                    <th>實際投資金額(USD)</th>
+                    <th>獲利(USD)</th>
+                    <th>本+利息(USD)</th>
+                    <th>換匯(TWD)</th>
                 </tr>
             </thead>
             <tbody id="tbd2"></tbody>
