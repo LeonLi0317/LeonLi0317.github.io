@@ -47,6 +47,7 @@
         //試算 fn
         function Calculate() {
             $('#tbd2').empty();
+            $('#tbd3').empty();
             let tbody = $('#tbd2');
             let B_M = 1;
             let E_M = 1;
@@ -65,16 +66,24 @@
                     let Income = Number(T_MASTER_CAP) * (PCNT / 12) * Number(Mn);
                     Income = Math.round(Income);
                     let Total = Number(MASTER_CAP) + Income;
-                    let ToTWD = Math.round(Total * Number(USPCNT));
+                    let ToTWD = Math.round(Total * USPCNT);
+                    let COST = $('#COST').val();
+                    COST = replaceComma(COST);
+                    COST = COST * Mn;
+                    let finalTotalTWD = ToTWD-COST;
+                    let finalTotalUSD = Math.round(finalTotalTWD / USPCNT);
                     //console.log(PCNT);
                     //console.log(Income);
-                    tbody.append(`<tr><td colspan="6" style="text-align:center;" ><span style="font-weight:bold;color:darkmagenta;">${IncomePCNT}</span></td></tr>
+                    tbody.append(`<tr><td colspan="9" style="text-align:center;" ><span style="font-weight:bold;color:darkmagenta;">${IncomePCNT}</span></td></tr>
                     <tr><td><span id="sp_Mn${index}">${"1~" + Mn + "月"}</span></td>
                     <td><span id="sp_MASTER_CAP${index}">${numberComma(MASTER_CAP)}</span></td>
                     <td><span id="sp_T_MASTER_CAP${index}">${numberComma(T_MASTER_CAP)}</span></td>
                     <td><span id="sp_Income${index}">${numberComma(Income)}</span></td>
                     <td><span id="sp_Total${index}">${numberComma(Total)}</span></td>
                     <td><span id="sp_ToTWD${index}">${numberComma(ToTWD)}</span></td>
+                    <td><span id="sp_COST${index}">${numberComma(COST)}</span></td>
+                    <td><span id="sp_finalTotalTWD${index}">${numberComma(finalTotalTWD)}</span></td>
+                    <td><span id="sp_finalTotalUSD${index}">${numberComma(finalTotalUSD)}</span></td>
                     </tr>`)
                 } else {
                     let IncomePCNT = $(`#txtIncome${index}`).val();
@@ -84,7 +93,7 @@
                     B_M = index - 1 == 0 ? Number(($(`#txtMonth${index - 1}`).val())) + 1 : E_M + 1;
                     E_M = Number($(`#txtMonth${index}`).val());
                     E_M = B_M + E_M - 1;
-                    let MASTER_CAP = $(`#sp_Total${index - 1}`).text();
+                    let MASTER_CAP = $(`#sp_finalTotalUSD${index - 1}`).text();
                     MASTER_CAP = replaceComma(MASTER_CAP);
                     //console.log(MASTER_CAP);
                     let T_MASTER_CAP = MASTER_CAP.replace(RIGHT(MASTER_CAP, 4), '0000');
@@ -93,17 +102,40 @@
                     let Income = Number(T_MASTER_CAP) * (PCNT / 12) * Number(Mn);
                     Income = Math.round(Income);
                     let Total = Number(MASTER_CAP) + Income;
-                    let ToTWD = Math.round(Total * Number(USPCNT));
-                    tbody.append(`<tr><td colspan="6" style="text-align:center;" ><span style="font-weight:bold;color:darkmagenta;">${IncomePCNT}</span></td></tr>
+                    let ToTWD = Math.round(Total * USPCNT);
+                    let COST = $('#COST').val();
+                    COST = replaceComma(COST);
+                    COST = COST * Mn;
+                    let finalTotalTWD = ToTWD-COST;
+                    let finalTotalUSD = Math.round(finalTotalTWD / USPCNT);
+
+                    tbody.append(`<tr><td colspan="9" style="text-align:center;" ><span style="font-weight:bold;color:darkmagenta;">${IncomePCNT}</span></td></tr>
                     <tr><td><span id="sp_Mn${index}">${B_M + "~" + E_M + "月"}</span></td>
                     <td><span id="sp_MASTER_CAP${index}">${numberComma(MASTER_CAP)}</span></td>
                     <td><span id="sp_T_MASTER_CAP${index}">${numberComma(T_MASTER_CAP)}</span></td>
                     <td><span id="sp_Income${index}">${numberComma(Income)}</span></td>
                     <td><span id="sp_Total${index}">${numberComma(Total)}</span></td>
                     <td><span id="sp_ToTWD${index}">${numberComma(ToTWD)}</span></td>
+                    <td><span id="sp_COST${index}">${numberComma(COST)}</span></td>
+                    <td><span id="sp_finalTotalTWD${index}">${numberComma(finalTotalTWD)}</span></td>
+                    <td><span id="sp_finalTotalUSD${index}">${numberComma(finalTotalUSD)}</span></td>
                     </tr>`)
                     //console.log(B_M);
                     //console.log(E_M);
+                    let tbd = $('#tbd tr').length;
+                    if(tbd == index +1 ){
+                        let tbd3 = $('#tbd3');
+                        let ORIMASTER_CAP = replaceComma($('#MASTER_CAP').val());
+                        let totalwithoutCAPTWD = finalTotalUSD - Number(ORIMASTER_CAP);
+                        let RATE = replaceComma($('#RATE').val());
+                        let totalwithoutCAPUSD = finalTotalTWD - Number(RATE);
+                        console.log(MASTER_CAP);
+                        console.log(finalTotalUSD);
+                        tbd3.append(`<tr><td class="table-warning"></td>
+                            <td class="table-warning">總盈餘(美金)：${numberComma(totalwithoutCAPTWD)}</td>
+                            <td class="table-danger"></td>
+                            <td class="table-danger">總盈餘(台幣)：${numberComma(totalwithoutCAPUSD)}</td></tr>`);
+                    }
                 };
             });
         };
@@ -120,7 +152,7 @@
 
         $(document).ready(function () {
             //只允許輸入數字
-            $('#MASTER_CAP').on('keypress',function(e){
+            $('#MASTER_CAP,#COST').on('keypress',function(e){
                 var inputvalue = e.which;
                 if(inputvalue < 48 || inputvalue > 57){
                     e.preventDefault();
@@ -149,8 +181,8 @@
             });
             //清空+還原欄位 td
             $('#DeleteALL').on('click', function () {
-                let tbody = $('#tbd,#tbd2').find('tr');
-                let num = $('#tbd,#tbd2').find('tr').length;
+                let tbody = $('#tbd,#tbd2,#tbd3').find('tr');
+                let num = $('#tbd,#tbd2,#tbd3').find('tr').length;
                 for (let i = 1; i <= num ; i++) {
                     tbody.eq(i).remove();
                 }
@@ -174,9 +206,9 @@
             });
 
             //欄位選取時移除逗號
-            $('#MASTER_CAP').on('focus',function(){
-                var val = $('#MASTER_CAP').val();
-                $('#MASTER_CAP').val(replaceComma(val));
+            $('#MASTER_CAP,#COST').on('focus',function(){
+                var val = $(this).val();
+                $(this).val(replaceComma(val));
             });
 
             //本金檢核 必須超過1w
@@ -200,6 +232,11 @@
                     USDtoTWD();
                 }
             });
+            $('#COST').on('blur',function(){
+               let COST = $('#COST').val();
+               COST = numberComma(COST);
+               $('#COST').val(COST);
+            });
         });
     </script>
     <meta charset="utf-8" />
@@ -210,7 +247,13 @@
         <div class="col">
             <label for="US">美金匯率1：</label>
             <label for="USPCNT">
-                <input type="text" class="form-control NUM" id="USPCNT" placeholder="比值" maxlength="4" style="width:35%" aria-label="RATE">
+                <input type="text" class="form-control NUM" id="USPCNT" placeholder="比值" maxlength="4" style="width:35%" aria-label="USPCNT">
+            </label>
+        </div>
+        <div class="col">
+            <label for="exptre">每月開支(TWD)</label>
+            <label for="COST">
+                <input type="text" class="form-control NUM" id="COST" placeholder="輸入金額" aria-label="COST">
             </label>
         </div>
     </div>
@@ -265,9 +308,20 @@
                     <th>獲利(USD)</th>
                     <th>本+利息(USD)</th>
                     <th>換匯(TWD)</th>
+                    <th>支出(TWD)</th>
+                    <th>盈餘(TWD)</th>
+                    <th>盈餘(USD)</th>
                 </tr>
             </thead>
             <tbody id="tbd2"></tbody>
+            <br>
+        </table>
+        <table class="table table-hover caption-top" id="tb3" style="width:99%">
+            <caption></caption>
+            <thead>
+            </thead>
+            <tbody id="tbd3"></tbody>
+            <br>
         </table>
     </div>
 </body>
